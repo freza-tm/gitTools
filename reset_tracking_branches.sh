@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# call with --reset-all to reset all tracking brancher, otherwise only master and release branches are reset
+# call with --reset-all to reset all tracking branches, otherwise only master and release branches are reset
 
 git diff-index --quiet HEAD > /dev/null 2>&1
 if [ $? -ne 0 ]; then
