@@ -10,8 +10,8 @@ fi
 
 git fetch --prune --all --tags
 
-BRANCHMAP=`git for-each-ref --format='%(refname:short)|%(upstream:short)' refs/heads`
-CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+BRANCHMAP=$(git for-each-ref --format='%(refname:short)|%(upstream:short)' refs/heads)
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 echo ""
 echo "NON-TRACKING branches:"
@@ -64,7 +64,7 @@ for local in $TODELETE; do
   if [ "$local" = "$CURRENT_BRANCH" ]; then
     echo "  $local is current HEAD, cannot delete!"
   else
-    echo "  $local ` git show-ref --heads -s $local`"
+    echo "  $local $(git show-ref --heads -s $local)"
     git branch -d -f "$local" > /dev/null 2>&1
   fi
 done

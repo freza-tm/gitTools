@@ -7,13 +7,13 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-LOCAL=`git name-rev --name-only --no-undefined $1`
+LOCAL=$(git name-rev --name-only --no-undefined $1)
 if [ $? -ne 0 ]; then
   echo "Given SHA is not local branch!"
   exit 1
 fi
 
-REMOTE=`git for-each-ref --format='%(upstream:short)' refs/heads/$LOCAL`
+REMOTE=$(git for-each-ref --format='%(upstream:short)' refs/heads/$LOCAL)
 
 if [ -z "$REMOTE" ]; then
   echo "Local branch is not tracking remote!"
@@ -26,7 +26,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 echo ""
 echo "$LOCAL -> $REMOTE"
