@@ -31,6 +31,11 @@ CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
 echo ""
 echo "$LOCAL -> $REMOTE"
 if [ "$LOCAL" = "$CURRENT_BRANCH" ]; then
+  git diff-index --quiet HEAD > /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo >&2 "[ERROR] Working directory is not clean, sync NOT performed!"
+    exit 1
+  fi
   git reset --hard "$REMOTE" > /dev/null 2>&1
 else
   git branch -f "$LOCAL" "$REMOTE" > /dev/null 2>&1
