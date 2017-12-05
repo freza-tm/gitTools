@@ -44,29 +44,32 @@ if [[ -n $1 || $1 != "--reset-all" ]]; then
   done
 fi
 
-
-echo ""
-echo "RESETING branches:"
-for branchpair in $TORESET; do
-  local=${branchpair%|*}
-  remote=${branchpair#*|}
-  echo "  $local -> $remote"
-  if [ "$local" = "$CURRENT_BRANCH" ]; then
+if [[ -n $TORESET ]]; then
+  echo
+  echo "RESETTING branches:"
+  for branchpair in $TORESET; do
+    local=${branchpair%|*}
+    remote=${branchpair#*|}
+    echo "  $local -> $remote"
+    if [ "$local" = "$CURRENT_BRANCH" ]; then
     git reset --hard "$remote" > /dev/null 2>&1
-  else
+    else
     git branch -f "$local" "$remote" > /dev/null 2>&1
-  fi
-done
+    fi
+  done
+fi
 
-echo ""
-echo "DELETING branches:"
-for local in $TODELETE; do
-  if [ "$local" = "$CURRENT_BRANCH" ]; then
+if [[ -n $TODELETE ]]; then
+  echo
+  echo "DELETING branches:"
+  for local in $TODELETE; do
+    if [ "$local" = "$CURRENT_BRANCH" ]; then
     echo "  $local is current HEAD, cannot delete!"
-  else
+    else
     echo "  $local $(git show-ref --heads -s $local)"
     git branch -d -f "$local" > /dev/null 2>&1
-  fi
-done
+    fi
+  done
+fi
 
 exit 0;
