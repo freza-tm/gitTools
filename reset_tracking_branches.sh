@@ -37,7 +37,7 @@ if [[ -n $1 || $1 != "--reset-all" ]]; then
   ALLRESETS=$TORESET
   TORESET=""
   for branchpair in $ALLRESETS; do
-    if [[ "$branchpair" == master* || "$branchpair" = release* ]]; then
+    if [[ "$branchpair" == master* || "$branchpair" = release* || "$branchpair" = frozen* ]]; then
       TORESET="${TORESET}
       ${branchpair}"
     fi
