@@ -3,33 +3,49 @@
 # call with SHA as parameter
 
 if [ $# -ne 1 ]; then
-  echo "Expect commit hash as parameter!"
+  echo "Expected branch name as a parameter!"
   exit 1
 fi
 
-LOCAL=$(git name-rev --name-only --no-undefined $1)
-if [ $? -ne 0 ]; then
-  echo "Given SHA is not local branch!"
-  exit 1
-fi
+LOCAL=$1
+LOCAL_FULL=refs/heads/$LOCAL
+REMOTE=$1
+REMOTE_FULL=refs/remotes/$REMOTE
 
-REMOTE=$(git for-each-ref --format='%(upstream:short)' refs/heads/$LOCAL)
+git show-ref --verify --quiet $LOCAL_FULL 2>/dev/null
+if [[ $? -eq 0 ]]; then
+  REMOTE=$(git for-each-ref --format='%(upstream:short)' $LOCAL_FULL)
+  REMOTE_FULL=refs/remotes/$REMOTE
+  
+  if [ -z "$REMOTE" ]; then
+    echo "Local branch $LOCAL is not tracking any remote branch!"
+    exit 0
+  fi;
 
-if [ -z "$REMOTE" ]; then
-  echo "Local branch is not tracking remote!"
-  exit 0
-fi;
-
-git show-ref --verify --quiet "refs/remotes/$REMOTE"
-if [ $? -ne 0 ]; then
-  echo "Remote branch no longer exists!"
-  exit 1
+  git show-ref --verify --quiet $REMOTE_FULL
+  if [ $? -ne 0 ]; then
+    echo "Remote branch $REMOTE no longer exists!"
+    exit 1
+  fi
+else
+  git show-ref --verify --quiet $REMOTE_FULL 2>/dev/null
+  if [[ $? -eq 0 ]]; then
+    LOCAL=$(git for-each-ref --format='%(refname:short):%(upstream:short)' refs/heads/** | grep ":$REMOTE" | cut -d: -f1)
+    if [[ -z $LOCAL ]]; then
+      # create a name for the new local branch
+      LOCAL=$(echo $REMOTE | cut -d/ -f2-)
+    fi
+  else
+    echo "$1 does not represent a valid short branch name!"
+    exit 1
+  fi
 fi
 
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-echo ""
+echo
 echo "$LOCAL -> $REMOTE"
+
 if [ "$LOCAL" = "$CURRENT_BRANCH" ]; then
   git diff-index --quiet HEAD > /dev/null 2>&1
   if [ $? -ne 0 ]; then
