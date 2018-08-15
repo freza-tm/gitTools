@@ -6,11 +6,12 @@ if [ $? -ne 0 ]; then
 fi
 
 exitStatus=0
+MERGE_BRANCH="master-merge-dry-run"
 
 if [ $# -eq 1 ]; then
-   git checkout -b master-merge-dry-run $1 > /dev/null 2>&1
+   git checkout -b $MERGE_BRANCH $1 > /dev/null 2>&1
 else
-   git checkout -b master-merge-dry-run > /dev/null 2>&1
+   git checkout -b $MERGE_BRANCH > /dev/null 2>&1
 fi
 
 if [ $? -ne 0 ]; then
@@ -30,5 +31,5 @@ fi
 
 git merge --abort > /dev/null 2>&1
 git checkout - > /dev/null 2>&1
-git branch -D master-merge-dry-run > /dev/null 2>&1
+git branch -D $MERGE_BRANCH
 exit $exitStatus
