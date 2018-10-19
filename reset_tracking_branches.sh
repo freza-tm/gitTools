@@ -8,9 +8,15 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+git fetch --all --tags
+
+BRANCHMAP=$(git for-each-ref --format='%(refname:short)|%(upstream:short)|%(upstream:trackshort)' refs/heads)
+AHEADS=$(echo "$BRANCHMAP" | grep ">" | cut -f1 -d '|')
+
+BRANCHMAP=$(echo "$BRANCHMAP" | grep -v ">" | cut -f1,2 -d '|')
+
 git fetch --prune --all --tags
 
-BRANCHMAP=$(git for-each-ref --format='%(refname:short)|%(upstream:short)' refs/heads)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 echo ""
@@ -57,6 +63,20 @@ if [[ -n $TORESET ]]; then
     git branch -f "$local" "$remote" > /dev/null 2>&1
     fi
   done
+fi
+
+TOUNTRACK=$(comm -12 <(echo $AHEADS) <(echo $TODELETE) )
+TODELETE=$(comm -13 <(echo $AHEADS) <(echo $TODELETE) )
+
+for branch in $TOUNTRACK; do
+  git branch --unset-upstream $branch
+done
+
+if [[ -n $TOUNTRACK ]]; then
+  TOUNTRACK=$(echo "$TOUNTRACK" | sed -r "s/^/  /")
+  echo ""
+  echo "UNTRACKING branches:
+$TOUNTRACK"
 fi
 
 if [[ -n $TODELETE ]]; then
